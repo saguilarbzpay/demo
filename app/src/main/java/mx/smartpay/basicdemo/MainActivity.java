@@ -8,10 +8,13 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.google.gson.Gson;
+
 import mx.smartpay.libsdk.BaseResponse;
 import mx.smartpay.libsdk.ITransAPI;
 import mx.smartpay.libsdk.SaleMsg;
 import mx.smartpay.libsdk.TransAPIFactory;
+import mx.smartpay.libsdk.VoidMsg;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -23,7 +26,10 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         api = TransAPIFactory.createTransAPI(this);
         EditText etAmount = findViewById(R.id.etAmount);
+        EditText etCargo = findViewById(R.id.etCargo);
+
         Button btnSale = findViewById(R.id.btnSale);
+        Button btnCancelar = findViewById(R.id.btnCancelar);
 
         btnSale.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -34,8 +40,26 @@ public class MainActivity extends AppCompatActivity {
 
                 SaleMsg.Request request = new SaleMsg.Request();
                 request.setAmount(amount);
+                request.setAppId(BuildConfig.APPLICATION_ID);
                 request.setTipAmount(0.0); //opcional
                 request.setMsi(0); //meses sin intereses (3, 6, 9, 12 o 18)
+
+                api.doTrans(request);
+
+            }
+        });
+
+
+        btnCancelar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                String cargoText = etCargo.getText().toString();
+                int cargo = Integer.parseInt(cargoText);
+
+                VoidMsg.Request request = new VoidMsg.Request();
+                request.setVoucherNo(cargo);
+                request.setAppId(BuildConfig.APPLICATION_ID);
 
                 api.doTrans(request);
 
@@ -49,10 +73,14 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         BaseResponse baseResponse = api.onResult(requestCode,resultCode,data);
+        EditText etResponse;
+        if(baseResponse instanceof VoidMsg.Response) {
+            etResponse = findViewById(R.id.etResponse2);
+        } else {
+            etResponse = findViewById(R.id.etResponse);
+        }
 
-
-        EditText etResponse = findViewById(R.id.etResponse);
-        etResponse.setText(baseResponse.toString());
+        etResponse.setText(new Gson().toJson(baseResponse));
 
     }
 }
