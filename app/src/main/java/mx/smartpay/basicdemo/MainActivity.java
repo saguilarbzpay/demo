@@ -1,14 +1,19 @@
 package mx.smartpay.basicdemo;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Base64;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
 import com.google.gson.Gson;
+
+import java.io.ByteArrayOutputStream;
 
 import mx.smartpay.libsdk.BaseResponse;
 import mx.smartpay.libsdk.ITransAPI;
@@ -41,6 +46,16 @@ public class MainActivity extends AppCompatActivity {
                 SaleMsg.Request request = new SaleMsg.Request();
                 request.setAmount(amount);
                 request.setAppId(BuildConfig.APPLICATION_ID);
+
+                //Si necesitamos enviar un logotipo alternativo, agregar descomentar las siguientes lineas
+                Bitmap bm = BitmapFactory.decodeResource(getResources(), R.drawable.logo_png);
+
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                bm.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+                String logoBase64 = Base64.encodeToString(outputStream.toByteArray(), Base64.DEFAULT);
+
+                request.setLogoImage(logoBase64);
+
                 request.setTipAmount(0.0); //opcional
                 request.setMsi(0); //meses sin intereses (3, 6, 9, 12 o 18)
 
@@ -60,6 +75,15 @@ public class MainActivity extends AppCompatActivity {
                 VoidMsg.Request request = new VoidMsg.Request();
                 request.setVoucherNo(cargo);
                 request.setAppId(BuildConfig.APPLICATION_ID);
+
+                Bitmap bm = BitmapFactory.decodeResource(getResources(), R.drawable.logo_png);
+
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                bm.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+                String logoBase64 = Base64.encodeToString(outputStream.toByteArray(), Base64.DEFAULT);
+
+                request.setLogoImage(logoBase64);
+
 
                 api.doTrans(request);
 
